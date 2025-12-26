@@ -4,6 +4,10 @@ export interface IMocaTest {
   date: string;               // visit date or days_to_visit
   totalScore: number;         // mocatots
   subscores: {
+    visuospatialExec: number; // sum of mocatrai, mocacube, mocacloc, etc.
+    naming: number;           // mocanami
+    attention: number;        // mocadigi, mocalett, mocaser7
+    language: number;         // mocarepe, mocaflue
     abstraction: number;      // mocaabst
     recall: number;           // mocarecc
     orientation: number;      // mocaorct
@@ -28,6 +32,10 @@ const MocaTestSchema = new Schema({
   date: { type: String, required: true },
   totalScore: { type: Number, required: true },
   subscores: {
+    visuospatialExec: { type: Number, required: true },
+    naming: { type: Number, required: true },
+    attention: { type: Number, required: true },
+    language: { type: Number, required: true },
     abstraction: { type: Number, required: true },
     recall: { type: Number, required: true },
     orientation: { type: Number, required: true }
@@ -49,4 +57,3 @@ const PatientSchema = new Schema({
 });
 
 export default mongoose.model<IPatient>('Patient', PatientSchema);
-

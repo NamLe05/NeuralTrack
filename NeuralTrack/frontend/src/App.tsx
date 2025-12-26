@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import PatientDetails from './pages/PatientDetails';
 import AddPatient from './pages/AddPatient';
 import AddAssessment from './pages/AddAssessment';
+import PatientDirectory from './pages/PatientDirectory';
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/patients" element={<Dashboard />} />
+          <Route path="/patients" element={<PatientDirectory />} />
           <Route path="/patient/:id" element={<PatientDetails />} />
           <Route path="/add-patient" element={<AddPatient />} />
           <Route path="/assessment/:id" element={<AddAssessment />} />

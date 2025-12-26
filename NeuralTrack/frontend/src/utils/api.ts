@@ -17,12 +17,28 @@ let patients: Patient[] = [
       {
         date: '2023-11-10',
         totalScore: 24,
-        subscores: { abstraction: 2, recall: 3, orientation: 5 }
+        subscores: {
+          visuospatialExec: 4,
+          naming: 3,
+          attention: 5,
+          language: 2,
+          abstraction: 2,
+          recall: 3,
+          orientation: 5
+        }
       },
       {
         date: '2024-03-15',
         totalScore: 22,
-        subscores: { abstraction: 1, recall: 2, orientation: 4 }
+        subscores: {
+          visuospatialExec: 3,
+          naming: 2,
+          attention: 4,
+          language: 2,
+          abstraction: 1,
+          recall: 2,
+          orientation: 4
+        }
       }
     ]
   },
@@ -41,7 +57,15 @@ let patients: Patient[] = [
       {
         date: '2024-01-20',
         totalScore: 18,
-        subscores: { abstraction: 1, recall: 1, orientation: 3 }
+        subscores: {
+          visuospatialExec: 2,
+          naming: 2,
+          attention: 3,
+          language: 1,
+          abstraction: 1,
+          recall: 1,
+          orientation: 3
+        }
       }
     ]
   }

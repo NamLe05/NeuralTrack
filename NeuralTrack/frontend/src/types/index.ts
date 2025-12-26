@@ -2,6 +2,10 @@ export interface MocaTest {
   date: string;
   totalScore: number;
   subscores: {
+    visuospatialExec: number;
+    naming: number;
+    attention: number;
+    language: number;
     abstraction: number;
     recall: number;
     orientation: number;
@@ -22,4 +26,3 @@ export interface Patient {
   currentCDR?: number;
   cdrSum?: number;
 }
-

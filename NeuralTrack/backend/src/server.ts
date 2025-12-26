@@ -22,7 +22,7 @@ app.use('/api/patients', mocaRoutes);
 app.get('/health', (req, res) => res.send('NeuralTrack API is running...'));
 
 // Connect to DB and Start Server
-// connectDB(); // Uncomment after setting up MONGODB_URI in .env
+// connectDB(); // Disabled for testing - no data saving to Mongo
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
