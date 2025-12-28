@@ -16,6 +16,7 @@ export interface IMocaTest {
 
 export interface IPatient extends Document {
   id: string;
+  doctorId: mongoose.Types.ObjectId;
   name: string;
   dob: string;
   sex: string;
@@ -44,6 +45,7 @@ const MocaTestSchema = new Schema({
 
 const PatientSchema = new Schema({
   id: { type: String, required: true, unique: true },
+  doctorId: { type: Schema.Types.ObjectId, ref: 'Doctor', required: true },
   name: { type: String, required: true },
   dob: { type: String, required: true },
   sex: { type: String, required: true },

@@ -1,11 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import connectDB from './utils/db';
 import patientRoutes from './routes/patientRoutes';
 import mocaRoutes from './routes/mocaRoutes';
-
-dotenv.config();
+import authRoutes from './routes/authRoutes';
+import connectDB from './utils/db';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/patients', mocaRoutes);
 
@@ -22,8 +24,7 @@ app.use('/api/patients', mocaRoutes);
 app.get('/health', (req, res) => res.send('NeuralTrack API is running...'));
 
 // Connect to DB and Start Server
-// connectDB(); // Disabled for testing - no data saving to Mongo
+//connectDB();
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-

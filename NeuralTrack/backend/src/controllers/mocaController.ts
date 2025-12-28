@@ -4,8 +4,18 @@ import Patient from '../models/Patient';
 export const addMocaTest = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    // Logic to add MOCA test for patient
-    res.status(201).json({ message: `Add MOCA test for patient ${id} placeholder` });
+    const doctorId = (req as any).user.id;
+    const testData = req.body;
+
+    const patient = await Patient.findOne({ id, doctorId });
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    patient.mocaTests.push(testData);
+    await patient.save();
+
+    res.status(201).json(patient);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
@@ -14,10 +24,64 @@ export const addMocaTest = async (req: Request, res: Response) => {
 export const getMocaTests = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    // Logic to fetch MOCA tests for patient
-    res.status(200).json({ message: `Fetch MOCA tests for patient ${id} placeholder` });
+    const doctorId = (req as any).user.id;
+
+    const patient = await Patient.findOne({ id, doctorId });
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    res.status(200).json(patient.mocaTests);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 };
 
+export const deleteMocaTest = async (req: Request, res: Response) => {
+  try {
+    const { id, index } = req.params;
+    const doctorId = (req as any).user.id;
+
+    const patient = await Patient.findOne({ id, doctorId });
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    const testIndex = parseInt(index);
+    if (isNaN(testIndex) || testIndex < 0 || testIndex >= patient.mocaTests.length) {
+      return res.status(400).json({ message: "Invalid test index" });
+    }
+
+    patient.mocaTests.splice(testIndex, 1);
+    await patient.save();
+
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const updateMocaTest = async (req: Request, res: Response) => {
+  try {
+    const { id, index } = req.params;
+    const doctorId = (req as any).user.id;
+    const updateData = req.body;
+
+    const patient = await Patient.findOne({ id, doctorId });
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    const testIndex = parseInt(index);
+    if (isNaN(testIndex) || testIndex < 0 || testIndex >= patient.mocaTests.length) {
+      return res.status(400).json({ message: "Invalid test index" });
+    }
+
+    patient.mocaTests[testIndex] = { ...patient.mocaTests[testIndex], ...updateData };
+    await patient.save();
+
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};

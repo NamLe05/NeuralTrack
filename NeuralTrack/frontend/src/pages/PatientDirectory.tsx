@@ -12,7 +12,10 @@ import {
   CheckCircle,
   MoreVertical,
   ArrowUpDown,
-  Download
+  Download,
+  Upload,
+  Plus,
+  UserPlus
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -106,7 +109,7 @@ const PatientDirectory: React.FC = () => {
       {/* Directory Header */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#EDEBE9] pb-6">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#323130]">Patient Directory</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-[#323130]">Patient Directory</h1>
           <p className="text-xs font-semibold text-[#605E5C] uppercase tracking-wider">
             {filteredPatients.length} Active Clinical Records
           </p>
@@ -117,25 +120,36 @@ const PatientDirectory: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A19F9D]" size={14} />
             <input
               type="text"
-              placeholder="Search by Name or ID..."
+              placeholder="Name or ID..."
               value={nameSearchTerm}
               onChange={(e) => setNameSearchBy(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-48 shadow-sm"
+              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-44 shadow-sm"
             />
           </div>
           <div className="relative group">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A19F9D]" size={14} />
             <input
               type="text"
-              placeholder="Filter by DOB (YYYY-MM-DD)..."
+              placeholder="DOB..."
               value={dobSearchTerm}
               onChange={(e) => setDobSearchBy(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-48 shadow-sm"
+              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-40 shadow-sm"
             />
           </div>
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm">
+            <Upload size={14} />
+            Export
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm">
             <Download size={14} />
-            Export CSV
+            Import
+          </button>
+          <button
+            onClick={() => navigate('/add-patient')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0078D4] hover:bg-[#106EBE] text-white rounded text-xs font-bold transition-all shadow-md active:scale-[0.98]"
+          >
+            <UserPlus size={14} />
+            New Patient
           </button>
         </div>
       </div>

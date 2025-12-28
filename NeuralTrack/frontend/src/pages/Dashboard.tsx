@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Patient, MocaTest } from '../types';
 import { fetchPatients } from '../utils/api';
-import { Activity, Users, AlertCircle, Plus, Clock, Download, MoreHorizontal, User, Brain, ChevronRight } from 'lucide-react';
+import { Activity, Users, AlertCircle, Plus, Clock, Download, MoreHorizontal, User, Brain, ChevronRight, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface RecentActivity {
@@ -26,11 +26,11 @@ const Dashboard: React.FC = () => {
         const response = await fetchPatients();
         if (Array.isArray(response.data)) {
           setPatients(response.data);
-          
+
           // Extract all MOCA tests and associate with patient info
           const activities: RecentActivity[] = [];
           response.data.forEach(p => {
-            p.mocaTests.forEach(t => {
+            p.mocaTests.forEach((t: MocaTest) => {
               activities.push({
                 patientId: p.id,
                 patientName: p.name,
@@ -77,15 +77,15 @@ const Dashboard: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm">
-            <Download size={14} />
+            <Upload size={14} />
             Export Data
           </button>
-          <button 
+          <button
             onClick={() => navigate('/add-patient')}
             className="flex items-center gap-2 px-4 py-2 bg-[#0078D4] hover:bg-[#106EBE] text-white rounded text-xs font-bold transition-all shadow-md active:scale-[0.98]"
           >
             <Plus size={14} />
-            Register New Patient
+            New Patient
           </button>
         </div>
       </div>
@@ -93,20 +93,28 @@ const Dashboard: React.FC = () => {
       {/* KPI Stats - More Grid-Aligned & Scientific */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Active Registry', value: patients.length, icon: Users, color: '#0078D4', bg: 'bg-[#DEECF9]' },
-          { label: 'High Priority (CDR ≥ 1)', value: patients.filter(p => (p.currentCDR || 0) >= 1).length, icon: AlertCircle, color: '#A4262C', bg: 'bg-[#FDE7E9]' },
-          { label: 'Screening Logs', value: patients.reduce((acc, p) => acc + (p.mocaTests?.length || 0), 0), icon: Activity, color: '#107C10', bg: 'bg-[#DFF6DD]' },
+          { label: 'Active Registry', value: patients.length, icon: Users, color: '#0078D4', description: 'Patients registered' },
+          { label: 'High Priority (CDR ≥ 1)', value: patients.filter(p => (p.currentCDR || 0) >= 1).length, icon: AlertCircle, color: '#A4262C', description: 'Requires immediate review' },
+          { label: 'Screening Logs', value: patients.reduce((acc, p) => acc + (p.mocaTests?.length || 0), 0), icon: Activity, color: '#107C10', description: 'Total assessments conducted' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-sm border border-[#EDEBE9] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-10 h-10 ${stat.bg} rounded flex items-center justify-center`} style={{ color: stat.color }}>
-                <stat.icon size={20} strokeWidth={2.5} />
+          <div key={i} className="bg-white border border-[#EDEBE9] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            {/* Subtle Left Border Accent */}
+            <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: stat.color }} />
+
+            <div className="px-5 py-4 flex flex-col justify-between h-full">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-[#605E5C] uppercase tracking-widest">{stat.label}</p>
+                  <p className="text-[9px] text-[#A19F9D] font-bold uppercase tracking-tight">{stat.description}</p>
+                </div>
+                <stat.icon size={16} style={{ color: stat.color }} strokeWidth={2.5} className="shrink-0" />
               </div>
-              <MoreHorizontal size={16} className="text-[#A19F9D] cursor-pointer" />
+
+              <div className="mt-4 flex items-baseline gap-2">
+                <p className="text-3xl font-black text-[#323130] tracking-tighter">{stat.value}</p>
+                <div className="text-[8px] font-bold text-[#A19F9D] uppercase tracking-widest">Records</div>
+              </div>
             </div>
-            <p className="text-[10px] font-bold text-[#605E5C] uppercase tracking-wider">{stat.label}</p>
-            <p className="text-4xl font-bold text-[#323130] mt-1">{stat.value}</p>
-            <div className="absolute bottom-0 left-0 w-full h-1" style={{ backgroundColor: stat.color }} />
           </div>
         ))}
       </div>
@@ -120,14 +128,14 @@ const Dashboard: React.FC = () => {
               <span className="text-[10px] bg-[#605E5C] text-white px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">Live Feed</span>
             </h2>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/patients')}
             className="text-[10px] font-bold text-[#0078D4] uppercase tracking-widest hover:underline"
           >
             Full Directory
           </button>
         </div>
-        
+
         <div className="p-6">
           {error ? (
             <div className="bg-[#FDE7E9] text-[#A4262C] p-4 rounded-sm border border-[#F1707B] flex items-center gap-3 font-bold text-xs">
@@ -142,7 +150,7 @@ const Dashboard: React.FC = () => {
                 </div>
               ) : (
                 recentActivities.map((activity, idx) => (
-                  <div 
+                  <div
                     key={`${activity.patientId}-${idx}`}
                     onClick={() => navigate(`/patient/${activity.patientId}`)}
                     className="bg-white border border-[#EDEBE9] rounded-sm p-5 hover:shadow-md transition-all duration-200 cursor-pointer group flex flex-col h-full relative"
@@ -159,7 +167,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-[10px] text-[#605E5C] font-semibold uppercase tracking-tighter">ID: {activity.patientId}</p>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col items-end gap-2">
                         <Clock size={14} className="text-[#A19F9D]" />
                         <span className="text-[8px] font-bold text-[#605E5C] uppercase tracking-tighter">{activity.test.date}</span>
@@ -182,14 +190,14 @@ const Dashboard: React.FC = () => {
                         <p className="text-[8px] text-[#A19F9D] font-bold uppercase">Patient Profile</p>
                         <p className="text-[10px] font-semibold text-[#323130] mt-0.5">{activity.patientSex} • {activity.patientDob}</p>
                       </div>
-                      
+
                       <div className="w-7 h-7 rounded bg-[#F3F2F1] text-[#605E5C] flex items-center justify-center group-hover:bg-[#0078D4] group-hover:text-white transition-all">
                         <ChevronRight size={14} />
                       </div>
                     </div>
                   </div>
                 )
-              ))}
+                ))}
             </div>
           )}
         </div>

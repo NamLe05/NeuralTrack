@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { addPatient } from '../utils/api';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { deletePatient, addPatient, fetchPatientById, updatePatient } from '../utils/api';
 import {
   ArrowLeft,
   User,
@@ -12,11 +12,17 @@ import {
   Fingerprint,
   ChevronRight,
   ShieldCheck,
-  Globe
+  Globe,
+  UserPlus,
+  UserCog,
+  Trash2
 } from 'lucide-react';
 
 const AddPatient: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const isEditMode = !!id;
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(isEditMode);
   const [formData, setFormData] = useState({
     name: '',
     dob: '',
@@ -28,56 +34,130 @@ const AddPatient: React.FC = () => {
     email: '',
   });
 
+  useEffect(() => {
+    if (isEditMode && id) {
+      const loadPatient = async () => {
+        try {
+          const response = await fetchPatientById(id);
+          const p = response.data;
+          if (p) {
+            // Split address back into components if possible, or just put in street
+            const addressParts = p.address.split(', ');
+            const street = addressParts[0] || '';
+            const stateZip = addressParts[1] || '';
+            const stateZipParts = stateZip.split(' ');
+            const state = stateZipParts[0] || '';
+            const zip = stateZipParts[1] || '';
+
+            setFormData({
+              name: p.name,
+              dob: p.dob,
+              sex: p.sex as any,
+              streetAddress: street,
+              state: state,
+              zipCode: zip,
+              phone: p.phone,
+              email: p.email,
+            });
+          }
+        } catch (err) {
+          console.error("Failed to load patient", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadPatient();
+    }
+  }, [isEditMode, id]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const tempId = `NT-${Math.floor(10000 + Math.random() * 90000)}`;
-
       // Concatenate address for the unified address field in the data model
       const fullAddress = `${formData.streetAddress}, ${formData.state} ${formData.zipCode}`;
 
-      const payload = {
-        id: tempId,
-        name: formData.name,
-        dob: formData.dob,
-        sex: formData.sex,
-        address: fullAddress,
-        phone: formData.phone,
-        email: formData.email,
-        createdAt: new Date().toISOString(),
-        mocaTests: []
-      };
-
-      await addPatient(payload as any);
-      navigate('/dashboard');
+      if (isEditMode && id) {
+        const payload = {
+          name: formData.name,
+          dob: formData.dob,
+          sex: formData.sex,
+          address: fullAddress,
+          phone: formData.phone,
+          email: formData.email,
+        };
+        await updatePatient(id, payload);
+        navigate(`/patient/${id}`);
+      } else {
+        const tempId = `NT-${Math.floor(10000 + Math.random() * 90000)}`;
+        const payload = {
+          id: tempId,
+          name: formData.name,
+          dob: formData.dob,
+          sex: formData.sex,
+          address: fullAddress,
+          phone: formData.phone,
+          email: formData.email,
+          createdAt: new Date().toISOString(),
+          mocaTests: []
+        };
+        await addPatient(payload as any);
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error(err);
     }
   };
+
+  const handleDeletePatient = async () => {
+    if (isEditMode && id && window.confirm(`Permanently delete ${formData.name}'s entire clinical record? This action cannot be undone.`)) {
+      try {
+        await deletePatient(id);
+        navigate('/dashboard');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-[60vh]">
+      <div className="w-10 h-10 border-2 border-[#EDEBE9] border-t-[#0078D4] rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
     <div className="animate-in fade-in duration-500 pb-10 max-w-5xl mx-auto space-y-4">
       <div className="flex items-center gap-2 text-xs font-semibold text-[#605E5C]">
         <span className="hover:text-[#0078D4] cursor-pointer" onClick={() => navigate('/dashboard')}>Registry</span>
         <ChevronRight size={12} />
-        <span className="text-[#323130]">New Patient Entry</span>
+        {isEditMode && (
+          <>
+            <span className="hover:text-[#0078D4] cursor-pointer" onClick={() => navigate(`/patient/${id}`)}>Patient Profile</span>
+            <ChevronRight size={12} />
+          </>
+        )}
+        <span className="text-[#323130]">{isEditMode ? 'Modify Record' : 'New Patient Entry'}</span>
       </div>
 
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#EDEBE9] pb-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-[#323130]">Register New Patient</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-[#323130]">
+            {isEditMode ? 'Edit Patient Profile' : 'Register New Patient'}
+          </h1>
           <p className="text-xs font-semibold text-[#605E5C] flex items-center gap-2 uppercase tracking-wider">
             <ShieldCheck size={14} className="text-[#107C10]" />
             Secure Clinical Registration Protocol
           </p>
         </div>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Back to Directory
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(isEditMode ? `/patient/${id}` : '/dashboard')}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#EDEBE9] rounded text-xs font-bold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm whitespace-nowrap min-w-[140px] justify-center"
+          >
+            <ArrowLeft size={16} />
+            {isEditMode ? 'Back to Profile' : 'Back to Directory'}
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 pt-4">
@@ -85,8 +165,10 @@ const AddPatient: React.FC = () => {
           {/* Patient Profile Container */}
           <div className="bg-white border border-[#EDEBE9] rounded-sm shadow-sm overflow-hidden flex flex-col">
             <div className="px-6 py-4 bg-[#FAF9F8] border-b border-[#EDEBE9] flex items-center gap-3">
-              <Fingerprint className="text-[#0078D4]" size={20} />
-              <h2 className="text-sm font-bold text-[#323130]">Patient Profile & Identity</h2>
+              {isEditMode ? <UserCog className="text-[#0078D4]" size={20} /> : <Fingerprint className="text-[#0078D4]" size={20} />}
+              <h2 className="text-sm font-bold text-[#323130]">
+                {isEditMode ? 'Identity Amendment' : 'Patient Profile & Identity'}
+              </h2>
             </div>
 
             <div className="p-6 space-y-6 flex-1">
@@ -229,17 +311,29 @@ const AddPatient: React.FC = () => {
           </div>
         </div>
 
-        {/* Centered Footer Button */}
-        <div className="flex flex-col items-center gap-2 pt-2">
-          <button
-            type="submit"
-            className="px-12 py-3 bg-[#323130] hover:bg-black text-white font-black rounded shadow-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-sm uppercase tracking-[0.2em]"
-          >
-            <Check size={20} strokeWidth={3} />
-            Register Patient
-          </button>
+        {/* Centered Footer Buttons */}
+        <div className="flex flex-col items-center gap-4 pt-2">
+          <div className="flex items-center gap-3">
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleDeletePatient}
+                className="px-10 py-3 bg-white border border-[#A4262C] text-[#A4262C] font-bold rounded shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] hover:bg-[#FDE7E9]"
+              >
+                <Trash2 size={18} strokeWidth={3} />
+                Delete Profile
+              </button>
+            )}
+            <button
+              type="submit"
+              className="px-10 py-3 bg-[#0078D4] hover:bg-[#106EBE] text-white font-bold rounded shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em]"
+            >
+              <Check size={18} strokeWidth={3} />
+              {isEditMode ? 'Update Profile' : 'Register Patient'}
+            </button>
+          </div>
           <p className="text-[10px] font-bold text-[#AAA] uppercase tracking-widest">
-            Encryption active • Clinical log entry pending
+            Protocol Verified • Clinical Log Entry Pending
           </p>
         </div>
       </form>
