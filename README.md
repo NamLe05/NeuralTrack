@@ -2,7 +2,7 @@
 
 NeuralTrack is a clinical decision-support platform that leverages machine learning to bridge the gap between low-cost cognitive screening (MoCA) and functional dementia staging (CDR). By analyzing longitudinal patient data, NeuralTrack provides doctors with real-time risk assessments and 12-month cognitive projections.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
@@ -44,10 +44,10 @@ NeuralTrack is a clinical decision-support platform that leverages machine learn
    ```
    *The application will be available at `http://localhost:5173`.*
 
-## 🛠️ Demo Mode
+##  Demo Mode
 For rapid testing, a **Dev Bypass** button is available on the login page. This allows you to explore the dashboard and patient registry without a live database connection (using local storage simulation).
 
-## 🔮 Future Goals
+##  Future Goals
 
 ### Model Refinement
 - **Azure ML Integration**: Migrate predictive pipelines to Azure Machine Learning for scalable, enterprise-grade inference.
