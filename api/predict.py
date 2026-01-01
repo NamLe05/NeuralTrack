@@ -49,20 +49,20 @@ def run_prediction(input_data):
         
         avg_mocatots = np.mean(all_mocas)
         sub = assess['subscores']
-        mem_orient = sub['memory_recall'] * sub['orientation']
+        mem_orient = sub['recall'] * sub['orientation']
         exec_atten = sub['visuospatialExec'] * sub['attention']
         age_moca = assess['age'] * mocatots
         
         subdomain_vals = [
             sub['visuospatialExec'], sub['naming'], sub['attention'],
-            sub['language'], sub['abstraction'], sub['memory_recall'], sub['orientation']
+            sub['language'], sub['abstraction'], sub['recall'], sub['orientation']
         ]
         cog_variance = np.std(subdomain_vals)
         
         features = [
             assess['age'], mocatots, sub['visuospatialExec'], sub['naming'], sub['attention'],
-            sub['language'], sub['abstraction'], sub['memory_recall'], sub['orientation'],
-            mem_orient, exec_atten, age_moca, sub['memory_recall'], sub['visuospatialExec'], cog_variance,
+            sub['language'], sub['abstraction'], sub['recall'], sub['orientation'],
+            mem_orient, exec_atten, age_moca, sub['recall'], sub['visuospatialExec'], cog_variance,
             visit_number, decline_rate, avg_mocatots
         ]
         
