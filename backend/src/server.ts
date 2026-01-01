@@ -21,12 +21,17 @@ app.use('/api/patients', patientRoutes);
 // Health Check
 app.get('/health', (req, res) => res.send('NeuralTrack API is running...'));
 
-// Connect to DB and Start Server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Only start the server if we're not in a serverless environment
+if (process.env.NODE_ENV !== 'production') {
+  // Connect to DB and Start Server
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }).catch(err => {
+    console.error('Failed to connect to MongoDB', err);
+    process.exit(1);
   });
-}).catch(err => {
-  console.error('Failed to connect to MongoDB', err);
-  process.exit(1);
-});
+}
+
+export default app;

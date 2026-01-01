@@ -18,6 +18,7 @@ Thumbs.db
 /DataSet/
 *.csv
 *.joblib
+!ml_models/**/*.joblib
 *.npz
 *.pkl
 

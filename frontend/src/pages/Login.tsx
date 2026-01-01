@@ -69,11 +69,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleDevLogin = () => {
-    localStorage.setItem('token', 'dev-token');
-    window.location.href = '/';
-  };
-
   return (
     <div className="min-h-screen w-full relative overflow-hidden bg-[#F3F2F1] flex flex-col items-center justify-start font-sans text-[#323130] pt-12 pb-20">
       {/* 3D Abstract Background Shapes */}
@@ -192,14 +187,6 @@ const Login: React.FC = () => {
                   Register
                 </Link>
               </p>
-              
-              <button 
-                type="button"
-                onClick={handleDevLogin}
-                className="text-[9px] font-bold text-[#A19F9D] hover:text-[#323130] uppercase tracking-[0.2em] transition-colors"
-              >
-                Dev Bypass
-              </button>
             </div>
           </div>
         </div>
