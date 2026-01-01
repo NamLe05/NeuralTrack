@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+dist/
+build/
+backend/dist/
+frontend/dist/
+.next/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env/
+DataSet/venv/
+
+# Large Data (The 300MB Culprit)
+DataSet/
+AI4Alzheimers2025/
+*.csv
+*.npz
+*.pkl
+*.joblib
+!ml_models/**/*.joblib
+
+# Local/IDE
+.DS_Store
+.vscode/
+.idea/
+.cursor/
+.vercel/
+*.log

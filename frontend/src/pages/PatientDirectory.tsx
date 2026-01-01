@@ -1,0 +1,259 @@
+import React, { useEffect, useState } from 'react';
+import { Patient } from '../types';
+import { fetchPatients } from '../utils/api';
+import { calculateClinicalMetrics } from '../utils/clinicalCalculations';
+import {
+  Search,
+  ChevronRight,
+  User,
+  Calendar,
+  Activity,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  MoreVertical,
+  ArrowUpDown,
+  Download,
+  Upload,
+  Plus,
+  UserPlus
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const PatientDirectory: React.FC = () => {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [nameSearchTerm, setNameSearchBy] = useState('');
+  const [dobSearchTerm, setDobSearchBy] = useState('');
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Patient | 'recentMoca' | 'age'; direction: 'asc' | 'desc' } | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await fetchPatients();
+        if (Array.isArray(response.data)) {
+          const sortedPatients = [...response.data].sort((a, b) =>
+            a.name.localeCompare(b.name)
+          );
+          setPatients(sortedPatients);
+          setFilteredPatients(sortedPatients);
+          setSortConfig({ key: 'name', direction: 'asc' });
+        }
+      } catch (err) {
+        console.error('Failed to fetch registry.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const calculateAge = (dob: string) => {
+    if (!dob) return 0;
+    const birthDate = new Date(dob);
+    const difference = Date.now() - birthDate.getTime();
+    const ageDate = new Date(difference);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
+  useEffect(() => {
+    let results = patients.filter(patient => {
+      const nameMatch = patient.name.toLowerCase().includes(nameSearchTerm.toLowerCase()) ||
+        patient.id.toLowerCase().includes(nameSearchTerm.toLowerCase());
+      const dobMatch = patient.dob.includes(dobSearchTerm);
+      return nameMatch && dobMatch;
+    });
+
+    // Re-apply sorting if config exists
+    if (sortConfig) {
+      results = [...results].sort((a, b) => {
+        let valA: any;
+        let valB: any;
+
+        if (sortConfig.key === 'age') {
+          valA = calculateAge(a.dob);
+          valB = calculateAge(b.dob);
+        } else if (sortConfig.key === 'recentMoca') {
+          valA = a.mocaTests.length > 0 ? a.mocaTests[a.mocaTests.length - 1].totalScore : -1;
+          valB = b.mocaTests.length > 0 ? b.mocaTests[b.mocaTests.length - 1].totalScore : -1;
+        } else {
+          valA = a[sortConfig.key as keyof Patient];
+          valB = b[sortConfig.key as keyof Patient];
+        }
+
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    setFilteredPatients(results);
+  }, [nameSearchTerm, dobSearchTerm, patients, sortConfig]);
+
+  const handleSort = (key: keyof Patient | 'recentMoca' | 'age') => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-[60vh]">
+      <div className="w-8 h-8 border-2 border-[#EDEBE9] border-t-[#0078D4] rounded-full animate-spin"></div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 text-[#323130]">
+      {/* Directory Header */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#EDEBE9] pb-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Patient Directory</h1>
+          <p className="text-xs font-semibold text-[#605E5C] uppercase tracking-wider">
+            {filteredPatients.length} Active Clinical Records
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A19F9D]" size={14} />
+            <input
+              type="text"
+              placeholder="Name or ID..."
+              value={nameSearchTerm}
+              onChange={(e) => setNameSearchBy(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-44 shadow-sm"
+            />
+          </div>
+          <div className="relative group">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A19F9D]" size={14} />
+            <input
+              type="text"
+              placeholder="DOB..."
+              value={dobSearchTerm}
+              onChange={(e) => setDobSearchBy(e.target.value)}
+              className="pl-9 pr-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold focus:border-[#0078D4] outline-none w-40 shadow-sm"
+            />
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm">
+            <Upload size={14} />
+            Export
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors shadow-sm">
+            <Download size={14} />
+            Import
+          </button>
+          <button
+            onClick={() => navigate('/add-patient')}
+            className="flex items-center gap-2 px-4 py-2 bg-[#0078D4] hover:bg-[#106EBE] text-white rounded text-xs font-bold transition-all shadow-md active:scale-[0.98]"
+          >
+            <UserPlus size={14} />
+            New Patient
+          </button>
+        </div>
+      </div>
+
+      {/* Directory Table */}
+      <div className="bg-white border border-[#EDEBE9] rounded-sm shadow-sm overflow-hidden overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[1000px]">
+          <thead>
+            <tr className="bg-[#FAF9F8] border-b border-[#EDEBE9]">
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest w-16 text-center">Status</th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest cursor-pointer group" onClick={() => handleSort('name')}>
+                <div className="flex items-center gap-2">Patient Name <ArrowUpDown size={10} className="text-[#A19F9D] group-hover:text-[#323130]" /></div>
+              </th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center cursor-pointer group" onClick={() => handleSort('age')}>
+                <div className="flex items-center justify-center gap-2">Age <ArrowUpDown size={10} className="text-[#A19F9D] group-hover:text-[#323130]" /></div>
+              </th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center">Gender</th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center">Current CDR</th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center">1Y Projection</th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center cursor-pointer group" onClick={() => handleSort('recentMoca')}>
+                <div className="flex items-center justify-center gap-2">Last MOCA <ArrowUpDown size={10} className="text-[#A19F9D] group-hover:text-[#323130]" /></div>
+              </th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center">Last Visit</th>
+              <th className="px-6 py-4 text-[10px] font-black text-[#605E5C] uppercase tracking-widest text-center cursor-pointer group" onClick={() => handleSort('dob')}>
+                <div className="flex items-center justify-center gap-2">DOB <ArrowUpDown size={10} className="text-[#A19F9D] group-hover:text-[#323130]" /></div>
+              </th>
+              <th className="px-6 py-4 w-10"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#EDEBE9]">
+            {filteredPatients.map((patient) => {
+              const latestMoca = patient.mocaTests.length > 0 ? patient.mocaTests[patient.mocaTests.length - 1] : null;
+              const metrics = calculateClinicalMetrics(patient);
+
+              return (
+                <tr
+                  key={patient.id}
+                  onClick={() => navigate(`/patient/${patient.id}`)}
+                  className="hover:bg-[#FAF9F8] cursor-pointer transition-colors group"
+                >
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex justify-center">
+                      <div className={`w-2.5 h-2.5 rounded-full`} style={{ backgroundColor: metrics.statusColor }} title={metrics.statusLabel} />
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-[#F3F2F1] rounded-sm flex items-center justify-center text-[#323130] font-bold text-xs group-hover:bg-[#323130] group-hover:text-white transition-colors">
+                        {patient.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#323130] leading-none">{patient.name}</p>
+                        <p className="text-[9px] text-[#A19F9D] font-semibold mt-1 uppercase">ID: {patient.id}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center text-xs font-semibold text-[#323130]">
+                    {calculateAge(patient.dob)}
+                  </td>
+                  <td className="px-6 py-4 text-center text-xs font-semibold text-[#323130]">
+                    {patient.sex}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`text-xs font-black ${metrics.currentCDR >= 1 ? 'text-[#A4262C]' : 'text-[#323130]'}`}>
+                      {metrics.currentCDR.toFixed(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`text-xs font-black ${metrics.futureCDR > metrics.currentCDR ? 'text-[#D83B01]' : 'text-[#323130]'}`}>
+                      {metrics.futureCDR.toFixed(1)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex flex-col items-center">
+                      <span className="text-xs font-bold text-[#323130]">{latestMoca ? latestMoca.totalScore : '--'}</span>
+                      <span className="text-[8px] font-bold text-[#A19F9D] uppercase">/ 30</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center text-xs font-semibold text-[#323130]">
+                    {latestMoca ? latestMoca.date : '--'}
+                  </td>
+                  <td className="px-6 py-4 text-center text-xs font-semibold text-[#323130]">
+                    {patient.dob}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button className="p-1 hover:bg-[#EDEBE9] rounded-sm transition-colors text-[#A19F9D] hover:text-[#323130]">
+                      <MoreVertical size={14} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {filteredPatients.length === 0 && (
+          <div className="p-20 text-center text-[#A19F9D]">
+            <p className="text-xs font-bold uppercase tracking-widest">No matching records found</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PatientDirectory;
