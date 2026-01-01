@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "install:all": "npm install && npm install --prefix frontend",
-    "build": "npm run build:frontend",
-    "build:frontend": "cd frontend && npm install && npm run build"
+    "build:backend": "tsc -p backend/tsconfig.json",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start": "node backend/dist/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

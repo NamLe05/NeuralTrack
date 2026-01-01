@@ -21,8 +21,8 @@ app.use('/api/patients', patientRoutes);
 // Health Check
 app.get('/health', (req, res) => res.send('NeuralTrack API is running...'));
 
-// Only start the server if we're not in a serverless environment
-if (process.env.NODE_ENV !== 'production') {
+// Only start the server if we're not in a serverless environment (like Vercel)
+if (!process.env.VERCEL) {
   // Connect to DB and Start Server
   connectDB().then(() => {
     app.listen(PORT, () => {
