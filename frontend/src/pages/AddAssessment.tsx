@@ -31,6 +31,8 @@ const AddAssessment: React.FC = () => {
     orientation: '',
   });
 
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     if (isEditMode && id && testIndex !== undefined) {
       const loadTestData = async () => {
@@ -76,7 +78,8 @@ const AddAssessment: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (id) {
+    if (id && !submitting) {
+      setSubmitting(true);
       try {
         const test: MocaTest = {
           date: formData.date,
@@ -103,6 +106,7 @@ const AddAssessment: React.FC = () => {
       } catch (err) {
         console.error("Save error:", err);
         alert("Failed to save assessment. Please check clinical connectivity.");
+        setSubmitting(false);
       }
     }
   };
@@ -135,7 +139,8 @@ const AddAssessment: React.FC = () => {
         </div>
         <button
           onClick={() => navigate(`/patient/${id}`)}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors"
+          disabled={submitting}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-[#EDEBE9] rounded text-xs font-semibold text-[#323130] hover:bg-[#FAF9F8] transition-colors disabled:opacity-50"
         >
           <ArrowLeft size={14} />
           Back to Profile
@@ -161,7 +166,8 @@ const AddAssessment: React.FC = () => {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A19F9D]" size={16} />
                   <input
                     type="date"
-                    className="w-full pl-10 pr-4 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full pl-10 pr-4 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
@@ -177,8 +183,9 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="30"
                     min="0"
+                    disabled={submitting}
                     placeholder="0"
-                    className="w-full pl-10 pr-4 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    className="w-full pl-10 pr-4 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.totalScore}
                     onChange={(e) => handleNumberChange('totalScore', e.target.value)}
                     required
@@ -201,7 +208,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="5"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.visuospatialExec}
                     onChange={(e) => handleNumberChange('visuospatialExec', e.target.value)}
                   />
@@ -212,7 +220,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="3"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.naming}
                     onChange={(e) => handleNumberChange('naming', e.target.value)}
                   />
@@ -223,7 +232,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="6"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.attention}
                     onChange={(e) => handleNumberChange('attention', e.target.value)}
                   />
@@ -234,7 +244,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="3"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.language}
                     onChange={(e) => handleNumberChange('language', e.target.value)}
                   />
@@ -245,7 +256,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="2"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.abstraction}
                     onChange={(e) => handleNumberChange('abstraction', e.target.value)}
                   />
@@ -256,7 +268,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="5"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.recall}
                     onChange={(e) => handleNumberChange('recall', e.target.value)}
                   />
@@ -267,7 +280,8 @@ const AddAssessment: React.FC = () => {
                     type="number"
                     max="6"
                     min="0"
-                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130]"
+                    disabled={submitting}
+                    className="w-full px-3 py-2 bg-[#FAF9F8] border border-[#EDEBE9] rounded focus:bg-white focus:border-[#0078D4] transition-all outline-none font-bold text-xs text-[#323130] disabled:opacity-50"
                     value={formData.orientation}
                     onChange={(e) => handleNumberChange('orientation', e.target.value)}
                   />
@@ -290,10 +304,15 @@ const AddAssessment: React.FC = () => {
         <div className="flex flex-col items-center gap-3 pt-2">
           <button
             type="submit"
-            className="px-10 py-3 bg-[#0078D4] hover:bg-[#106EBE] text-white font-bold rounded shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em]"
+            disabled={submitting}
+            className="px-10 py-3 bg-[#0078D4] hover:bg-[#106EBE] text-white font-bold rounded shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] disabled:opacity-50"
           >
-            <Check size={18} strokeWidth={3} />
-            Save Assessment
+            {submitting ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Check size={18} strokeWidth={3} />
+            )}
+            {submitting ? 'Saving...' : 'Save Assessment'}
           </button>
           <p className="text-[9px] font-bold text-[#A19F9D] uppercase tracking-widest">
             Protocol Verified • Digital Log Entry Pending
