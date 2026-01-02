@@ -70,10 +70,12 @@ export const deleteMocaTest = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid test index" });
     }
 
-    patient.mocaTests.splice(testIndex, 1);
-    await patient.save();
-
-    await updatePatientMLMetrics(patient);
+    // Safety check to ensure patient has tests before splicing
+    if (patient.mocaTests && patient.mocaTests.length > 0) {
+      patient.mocaTests.splice(testIndex, 1);
+      await patient.save();
+      await updatePatientMLMetrics(patient);
+    }
 
     res.status(200).json(patient);
   } catch (error) {

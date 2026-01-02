@@ -97,9 +97,12 @@ const AddAssessment: React.FC = () => {
         } else {
           await addMocaTest(id, test);
         }
-        navigate(`/patient/${id}`);
+        
+        // Immediate navigation after successful save
+        navigate(`/patient/${id}`, { replace: true });
       } catch (err) {
-        console.error(err);
+        console.error("Save error:", err);
+        alert("Failed to save assessment. Please check clinical connectivity.");
       }
     }
   };
