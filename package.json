@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install:all": "npm install && npm install --prefix frontend",
-    "build:backend": "tsc -p backend/tsconfig.json",
-    "build:frontend": "cd frontend && npm install && npm run build",
-    "build": "npm run build:frontend",
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "start": "node backend/dist/server.js"
   },
   "dependencies": {
